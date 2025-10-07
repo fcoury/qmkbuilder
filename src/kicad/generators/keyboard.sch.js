@@ -23,7 +23,7 @@ class SchematicsGenerator extends Generator {
       const lx = 1500;
       const ly = 1000 + (row * 1000);
       const data = { row, x: lx, y: ly };
-      components.push(ejs.render(rowLabelTpl, { data }));
+      components.push(ejs.render(rowLabelTpl, { data }).trim());
 
       // keeps track of the last switch on this row
       let lastX = 0;
@@ -34,7 +34,7 @@ class SchematicsGenerator extends Generator {
           const cx = 1500 + (col * 1000);
           const cy = 1000;
           const data = { col, x: cx, y: cy };
-          components.push(ejs.render(colLabelTpl, { data }));
+          components.push(ejs.render(colLabelTpl, { data }).trim());
         }
 
         // iterate through all the keys on this particular row/col
@@ -56,7 +56,7 @@ class SchematicsGenerator extends Generator {
             // renders the switch
 						const id = `${key.id.toString(16)}`;
 						const data = { key, name, id, x, y };
-						const theSwitch = ejs.render(switchTpl, { data, keyboard });
+						const theSwitch = ejs.render(switchTpl, { data, keyboard }).trim();
 						components.push(theSwitch);
 					});
           lastX = x;
@@ -67,7 +67,7 @@ class SchematicsGenerator extends Generator {
 			}
 
       // render the wiring from the diode to the row
-      components.push(ejs.render(wiringTpl, { x0: lx - 350, y0: ly + 400, x1: lastX - 350, y1: ly + 400 }));
+      components.push(ejs.render(wiringTpl, { x0: lx - 350, y0: ly + 400, x1: lastX - 350, y1: ly + 400 }).trim());
 		}
 
     // render the wiring from the switch pad to the column
@@ -75,7 +75,7 @@ class SchematicsGenerator extends Generator {
       const cx = 1500 + (col * 1000) + 300;
       const cy = lastColY[col];
       const data = { col, x: cx, y: cy };
-      components.push(ejs.render(wiringTpl, { x0: cx, y0: cy - 350, x1: cx, y1: 1000 }));
+      components.push(ejs.render(wiringTpl, { x0: cx, y0: cy - 350, x1: cx, y1: 1000 }).trim());
     }
   }
 
@@ -90,12 +90,12 @@ class SchematicsGenerator extends Generator {
     const { x, y } = this.getPadCoord(pad);
     const rotation = pad < 23 ? 0 : 2;
     const data = { text, x, y, rotation };
-    return ejs.render(glabelTpl, { data });
+    return ejs.render(glabelTpl, { data }).trim();
   }
 
   addNoConnect(pad) {
     const { x, y } = this.getPadCoord(pad);
-    return `NoConn ~ ${x} ${y}\n`;
+    return `NoConn ~ ${x} ${y}`;
   }
 
 	fillTemplate() {
@@ -119,7 +119,7 @@ class SchematicsGenerator extends Generator {
     this.renderMatrix(components);
 
 		return {
-			'components': components.join(''),
+			'components': components.filter(c => c.trim() !== '').join('\n'),
 		};
 	}
 
@@ -127,35 +127,35 @@ class SchematicsGenerator extends Generator {
     const vccTpl = require('./templates/keyboard.sch/vcc');
     const tstamp = genTstamp('vcc', 1);
     const data = { x: x - 1700, y: y - 1150, tstamp, name };
-    components.push(ejs.render(vccTpl, { data }));
+    components.push(ejs.render(vccTpl, { data }).trim());
   }
 
   addCap(x, y, name, components) {
     const capTpl = require('./templates/keyboard.sch/cap');
     const tstamp = genTstamp('cap', 1);
     const data = { x: x - 1250, y: y - 550, tstamp, name };
-    components.push(ejs.render(capTpl, { data }));
+    components.push(ejs.render(capTpl, { data }).trim());
   }
 
   addMicro(x, y, components) {
 		const microTpl = require('./templates/keyboard.sch/micro');
     const tstamp = genTstamp('micro', 1);
     const data = { x, y, tstamp, name: 'U1' };
-    components.push(ejs.render(microTpl, { data }));
+    components.push(ejs.render(microTpl, { data }).trim());
   }
 
   addUSB(_x, _y, components) {
     const usbTpl = require('./templates/keyboard.sch/usb');
     const tstamp = genTstamp('usb', 1);
     const data = { x: _x - 2000, y: _y - 800, tstamp, name: 'J1' };
-    components.push(ejs.render(usbTpl, { data }));
+    components.push(ejs.render(usbTpl, { data }).trim());
   }
 
   addResistor(_x, _y, name, components) {
     const resistorTpl = require('./templates/keyboard.sch/resistor');
     const tstamp = genTstamp('resistor', 1);
     const data = { x: _x - 1350, y: _y - 850, tstamp, name };
-    components.push(ejs.render(resistorTpl, { data }));
+    components.push(ejs.render(resistorTpl, { data }).trim());
   }
 
   addPadLabels(components) {
